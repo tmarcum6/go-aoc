@@ -1,14 +1,19 @@
 package aoc
 
 import(
-		"strings"
-		"strconv"
+	"strings"
+	"strconv"
+	"unicode"
 )
 
 func FetchSliceOfIntsInString(line string) []int {
 	nums := []int{}
 	var build strings.Builder
 	for _, char := range line {
+		if unicode.IsDigit(char) {
+			build.WriteRune(char)
+		}
+
 		if (char == ' ' || char == ',' || char == '~' || char == '|') && build.Len() != 0 {
 			localNum, err := strconv.ParseInt(build.String(), 10, 64)
 			if err != nil {
@@ -17,6 +22,14 @@ func FetchSliceOfIntsInString(line string) []int {
 			nums = append(nums, int(localNum))
 			build.Reset()
 		}
+	}
+	if build.Len() != 0 {
+		localNum, err := strconv.ParseInt(build.String(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		nums = append(nums, int(localNum))
+		build.Reset()
 	}
 	return nums
 }
