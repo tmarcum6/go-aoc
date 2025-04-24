@@ -1,35 +1,52 @@
 package main
 
 import (
-	"fmt"
-
 	utility "example.com/go/aoc/utility"
+	"fmt"
+	"math"
 )
 
 func main() {
 	lines := utility.ReadFileLineByLine("../../input/day2.txt")
-	//convertedLines := stringToIntArray(lines)
 
-	for l := range lines {
-		fmt.Println(lines[l])
-	} 
+	convertedLines := stringToIntSlice(lines)
 
-	//sort.Ints(convertedLines[0])
-	//sort.Ints(convertedLines[1])
-
-	//d1a := distanceBetween(convertedLines)
-	//fmt.Printf("Day 1 Part 1: %d\n", d1a)
-	//d1b := similarityScore(convertedLines)
-	//fmt.Printf("Day 1 Part 2: %d\n", d1b)
+	//d2a := distanceBetween(convertedLines)
+	//fmt.Printf("Day 2 Part 1: %d\n", d2a)
+	//d2b := similarityScore(convertedLines)
+	//fmt.Printf("Day 2 Part 2: %d\n", d2b)
 }
 
-func stringToIntArray(input []string) [][]int {
-	output := make([][]int, 2)
+func stringToIntSlice(input []string) []int {
+	var output []int
+	var increase bool
+	var decrease bool
+	var safe bool
+	var safeCount int
+	var accetableDifference int = 3
+	var unaccetable bool
 
 	for _, val := range input {
 		nums := utility.FetchSliceOfIntsInString(val)
-		output[0] = append(output[0], nums[0])
-		output[1] = append(output[1], nums[1])
+		for i := 1; i < len(nums); i++ {
+			if nums[i-1] > nums[i] {
+				decrease = true
+				if nums[i-1]+nums[i] > accetableDifference {
+					unaccetable = true
+				}
+			} else if nums[i-1] < nums[i] {
+				increase = true
+			}
+		}
+
+		if increase && decrease {
+			safe = false
+		}
+
+		if safe {
+
+			safeCount++
+		}
 	}
 
 	return output
