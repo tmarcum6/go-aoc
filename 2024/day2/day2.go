@@ -1,52 +1,94 @@
 package main
 
 import (
-	utility "example.com/go/aoc/utility"
 	"fmt"
-	"math"
+
+	utility "example.com/go/aoc/utility"
 )
 
 func main() {
 	lines := utility.ReadFileLineByLine("../../input/day2.txt")
-
-	convertedLines := stringToIntSlice(lines)
-
-	//d2a := distanceBetween(convertedLines)
-	//fmt.Printf("Day 2 Part 1: %d\n", d2a)
-	//d2b := similarityScore(convertedLines)
-	//fmt.Printf("Day 2 Part 2: %d\n", d2b)
+	safeCount, unsafeCount := safeCounter(lines)
+	fmt.Printf("Day 2 Part 1 safe: %d\n", safeCount)
+	fmt.Printf("Day 2 Part 1 unsafe: %d\n", unsafeCount)
 }
 
-func stringToIntSlice(input []string) []int {
-	var output []int
-	var increase bool
-	var decrease bool
-	var safe bool
+func safeCounter(input []string) (int, int) {
 	var safeCount int
-	var accetableDifference int = 3
-	var unaccetable bool
+	var unsafeCount int
 
 	for _, val := range input {
 		nums := utility.FetchSliceOfIntsInString(val)
-		for i := 1; i < len(nums); i++ {
-			if nums[i-1] > nums[i] {
-				decrease = true
-				if nums[i-1]+nums[i] > accetableDifference {
-					unaccetable = true
-				}
-			} else if nums[i-1] < nums[i] {
-				increase = true
+		safe := checkSafety(nums)
+		if safe {
+			safeCount++
+		} else {
+			if problemDampener(nums) {
+				safeCount++
+			} else {
+				unsafeCount++
 			}
+		}
+	}
+
+	return safeCount, unsafeCount
+}
+
+func checkSafety(input []int) bool {
+	var increase bool = false
+	var decrease bool = false
+	var output bool = true
+
+	for i := 1; i < len(input); i++ {
+		diff := input[i] - input[i-1]
+
+		if diff > 0 {
+			increase = true
+		} else if diff < 0 {
+			decrease = true
+		} else {
+			output = false
+		}
+
+		if diff > 3 || diff < -3 {
+			output = false
 		}
 
 		if increase && decrease {
-			safe = false
+			output = false
+		}
+	}
+
+	return output
+}
+
+func problemDampener(input []int) bool {
+	var increase bool = false
+	var decrease bool = false
+	var output bool = false
+	var unsafeCount int = 0
+
+	for i := 1; i < len(input); i++ {
+		diff := input[i] - input[i-1]
+
+		if diff > 0 {
+			increase = true
+		} else if diff < 0 {
+			decrease = true
+		} else {
+			unsafeCount++
 		}
 
-		if safe {
-
-			safeCount++
+		if diff > 3 || diff < -3 {
+			unsafeCount++
 		}
+
+		if increase && decrease {
+			unsafeCount++
+		}
+	}
+	if unsafeCount == 1 {
+		output = true
 	}
 
 	return output
