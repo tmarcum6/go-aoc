@@ -8,36 +8,32 @@ import (
 
 func main() {
 	lines := utility.ReadFileLineByLine("../../input/day2.txt")
-	safeCount, unsafeCount := safeCounter(lines)
-	fmt.Printf("Day 2 Part 1 safe: %d\n", safeCount)
-	fmt.Printf("Day 2 Part 1 unsafe: %d\n", unsafeCount)
+	safeCount, safeCountAfterRemove := safeCounter(lines)
+	fmt.Printf("Safe Count: %d\n", safeCount)
+	fmt.Printf("Safe Count After Remove: %d\n", safeCountAfterRemove)
+	fmt.Printf("Total: %d\n", safeCount+safeCountAfterRemove)
 }
 
 func safeCounter(input []string) (int, int) {
 	var safeCount int
-	var unsafeCount int
+	var safeCountAfterRemove int
 
 	for _, val := range input {
 		nums := utility.FetchSliceOfIntsInString(val)
-		safe := checkSafety(nums)
+		safe, i := checkSafety(nums)
 		if safe {
 			safeCount++
-		} else {
-			if problemDampener(nums) {
-				safeCount++
-			} else {
-				unsafeCount++
-			}
+		} else if safeAfterRemoveBadIndex(nums, i) {
+			safeCountAfterRemove++
 		}
 	}
 
-	return safeCount, unsafeCount
+	return safeCount, safeCountAfterRemove
 }
 
-func checkSafety(input []int) bool {
+func checkSafety(input []int) (bool, int) {
 	var increase bool = false
 	var decrease bool = false
-	var output bool = true
 
 	for i := 1; i < len(input); i++ {
 		diff := input[i] - input[i-1]
@@ -47,48 +43,32 @@ func checkSafety(input []int) bool {
 		} else if diff < 0 {
 			decrease = true
 		} else {
-			output = false
+			return false, i
 		}
 
 		if diff > 3 || diff < -3 {
-			output = false
+			return false, i
 		}
 
 		if increase && decrease {
-			output = false
+			return false, i
 		}
+
 	}
 
-	return output
+	return true, -1
 }
 
-func problemDampener(input []int) bool {
-	var increase bool = false
-	var decrease bool = false
-	var output bool = false
-	var unsafeCount int = 0
+func safeAfterRemoveBadIndex(input []int, badIndex int) bool {
+	inputCopy := make([]int, len(input))
+	copy(inputCopy, input)
 
-	for i := 1; i < len(input); i++ {
-		diff := input[i] - input[i-1]
+	inputCopy = utility.RemoveAt(inputCopy, badIndex)
+	output, _ := checkSafety(inputCopy)
 
-		if diff > 0 {
-			increase = true
-		} else if diff < 0 {
-			decrease = true
-		} else {
-			unsafeCount++
-		}
-
-		if diff > 3 || diff < -3 {
-			unsafeCount++
-		}
-
-		if increase && decrease {
-			unsafeCount++
-		}
-	}
-	if unsafeCount == 1 {
-		output = true
+	if !output {
+		fmt.Printf("Input Copy: %d\n", input)
+		fmt.Printf("Input Copy: %d\n", inputCopy)
 	}
 
 	return output
